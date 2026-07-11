@@ -393,7 +393,15 @@ section:focus{outline:none;}
     gap:1.1rem;padding:2rem clamp(1.25rem,5vw,4rem) 2.5rem;
     margin-inline:calc(50% - 50vw);
     background:rgba(33,6,53,.94);
+    /* own GPU layer: the machine composites during the sticky-stack
+       scroll instead of repainting every frame */
+    will-change:transform;transform:translateZ(0);
   }
+  /* CSS-first sizing: the browser sizes + scales the machine before first
+     paint (svh is stable, so the collapsing URL bar never re-triggers a
+     resize while scrolling). JS fit() only confirms the same value. */
+  #fitbox{width:min(92vw,56.26svh);aspect-ratio:640/910;}
+  #design{transform:translate(-50%,-50%) scale(calc(min(92vw,56.26svh) / 640px));}
   .machine-eyebrow{display:block;margin:0;}
   .scroll-cue{top:calc(100svh - 4.5rem);bottom:auto;}
 }
@@ -754,17 +762,29 @@ const DESIGN_W = 640, DESIGN_H = 910;
 const fitbox = document.getElementById('fitbox');
 const design = document.getElementById('design');
 function fit() {
-  const desktop = innerWidth > 920;
-  const s = Math.min(
-    (desktop ? innerWidth * 0.40 : innerWidth * 0.92) / DESIGN_W,
-    (desktop ? innerHeight * 0.86 : innerHeight * 0.80) / DESIGN_H,
-    1);
-  design.style.transform = `translate(-50%,-50%) scale(${s})`;
-  fitbox.style.width = DESIGN_W * s + 'px';
-  fitbox.style.height = DESIGN_H * s + 'px';
+  if (innerWidth > 920) {
+    /* desktop: unchanged JS sizing */
+    const s = Math.min(innerWidth * 0.40 / DESIGN_W, innerHeight * 0.86 / DESIGN_H, 1);
+    design.style.transform = `translate(-50%,-50%) scale(${s})`;
+    fitbox.style.width = DESIGN_W * s + 'px';
+    fitbox.style.height = DESIGN_H * s + 'px';
+  } else {
+    /* mobile: CSS owns the box (width + aspect-ratio, sized before paint).
+       JS only mirrors the scale as a fallback — a transform-only write,
+       no layout work. Clear any desktop inline size first. */
+    fitbox.style.width = '';
+    fitbox.style.height = '';
+    const s = Math.min(fitbox.clientWidth / DESIGN_W, 1);
+    design.style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
 }
 fit();
-addEventListener('resize', fit);
+/* rAF-throttled: at most one refit per frame */
+let fitRaf = 0;
+addEventListener('resize', () => {
+  cancelAnimationFrame(fitRaf);
+  fitRaf = requestAnimationFrame(fit);
+});
 /* reel constants */
 const REELS = 12;
 const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ-';   // space renders blank
