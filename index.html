@@ -373,7 +373,13 @@ section:focus{outline:none;}
     min-height:auto;padding-top:0;padding-bottom:0;
   }
   /* mobile sticky-stack: intro pins, slot machine slides up over it,
-     then skills/projects/contact scroll linearly */
+     then skills/projects/contact scroll linearly.
+     IMPORTANT: on mobile the hero is 200svh tall (intro + machine). If the
+     whole #hero stays sticky (desktop behavior), it pins at scroll 0 and its
+     second screen — the slot machine — can never scroll into view, so the
+     page jumps straight to skills. So on mobile the hero scrolls normally
+     and only the intro screen inside it pins. */
+  #hero{position:relative;top:auto;}
   .hero-copy{
     position:sticky;top:0;z-index:1;
     min-height:100svh;display:flex;flex-direction:column;justify-content:center;
