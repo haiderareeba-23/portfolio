@@ -322,9 +322,11 @@ section:focus{outline:none;}
 #design .lever-arm{
   position:absolute;right:28px;bottom:70px;width:16px;height:230px;
   transform-origin:50% calc(100% - 8px);
-  transition:transform .18s cubic-bezier(.4,0,.6,1);
+  /* return: spring back with overshoot + settle (bouncy, game-like) */
+  transition:transform .55s cubic-bezier(.34,1.8,.5,1);
 }
-#design .lever.pulled .lever-arm{transform:rotateX(145deg);transition:transform .3s cubic-bezier(.5,0,.7,.4);}
+/* pull: fast yank that overshoots the bottom, then settles */
+#design .lever.pulled .lever-arm{transform:rotateX(145deg);transition:transform .28s cubic-bezier(.3,1.4,.55,1);}
 #design .lever-shaft{
   position:absolute;inset:0 2px 0 2px;border-radius:7px;
   background:linear-gradient(90deg,var(--gold-dk),var(--gold) 45%,#D090D0);
@@ -607,6 +609,34 @@ section:focus{outline:none;}
     </div>
   </div>
 </section>
+<!-- sizes the slot machine immediately, while the page is still parsing —
+     before first paint, instead of waiting for the main script at the
+     bottom of the page -->
+<script>
+(function () {
+  const DESIGN_W = 640, DESIGN_H = 910;
+  const fitbox = document.getElementById('fitbox');
+  const design = document.getElementById('design');
+  function fit() {
+    if (innerWidth > 920) {
+      /* desktop: unchanged sizing math */
+      const s = Math.min(innerWidth * 0.40 / DESIGN_W, innerHeight * 0.86 / DESIGN_H, 1);
+      design.style.transform = `translate(-50%,-50%) scale(${s})`;
+      fitbox.style.width = DESIGN_W * s + 'px';
+      fitbox.style.height = DESIGN_H * s + 'px';
+    } else {
+      /* mobile: CSS owns the box; this just mirrors the scale */
+      fitbox.style.width = '';
+      fitbox.style.height = '';
+      const s = Math.min(fitbox.clientWidth / DESIGN_W, 1);
+      design.style.transform = `translate(-50%,-50%) scale(${s})`;
+    }
+  }
+  fit();
+  let raf = 0;
+  addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); });
+})();
+</script>
 <!-- ============ SKILLS ============ -->
 <section id="skills" class="panel" style="--z:2;" aria-label="skills" tabindex="-1">
   <div class="inner">
@@ -634,43 +664,75 @@ section:focus{outline:none;}
     <p class="eyebrow">· 02 — selected work</p>
     <h2 class="section-title">out of the <span class="tint">folder</span></h2>
     <div class="folder" aria-hidden="true"></div>
-    <div class="cards">
-      <!-- EDIT ME: swap in your real projects -->
-      <a class="card" href="#" style="--d:0ms;   --grad:linear-gradient(135deg,#CE9FFC,#7367F0); --tilt:-3deg;">
-        <div class="thumb"><span class="go">↗</span></div>
-        <div class="card-body">
-          <h3>AI-Search Visibility Program</h3>
-          <span class="tag">geo · aeo · llm citations</span>
-          <p>Built the playbook for getting product pages cited by ChatGPT, Perplexity &amp; AI Overviews — lifting AI-referred signups.</p>
-        </div>
-      </a>
-      <a class="card" href="#" style="--d:110ms; --grad:linear-gradient(135deg,#F97794,#623AA2); --tilt:2deg;">
-        <div class="thumb"><span class="go">↗</span></div>
-        <div class="card-body">
-          <h3>Onboarding Experiment Suite</h3>
-          <span class="tag">activation · a/b testing</span>
-          <p>Ran a season of onboarding experiments — copy, sequencing, aha-moment nudges — compounding into a double-digit activation lift.</p>
-        </div>
-      </a>
-      <a class="card" href="#" style="--d:220ms; --grad:linear-gradient(135deg,#E2B0FF,#9F44D3); --tilt:-2deg;">
-        <div class="thumb"><span class="go">↗</span></div>
-        <div class="card-body">
-          <h3>Content Growth Engine</h3>
-          <span class="tag">seo · editorial ops</span>
-          <p>Designed a keyword-to-publish pipeline that scaled organic content velocity without sacrificing quality or rankings.</p>
-        </div>
-      </a>
-      <a class="card" href="#" style="--d:330ms; --grad:linear-gradient(135deg,#F761A1,#8C1BAB); --tilt:3deg;">
-        <div class="thumb"><span class="go">↗</span></div>
-        <div class="card-body">
-          <h3>Pricing Page CRO</h3>
-          <span class="tag">conversion · gtm</span>
-          <p>Rebuilt the pricing experience around objections &amp; anchoring — a cleaner path from "curious" to "customer".</p>
-        </div>
-      </a>
-    </div>
+    <!-- cards are generated from the PROJECTS list in the script right
+         below this section — look for "ADD YOUR PROJECT PDF LINKS HERE" -->
+    <div class="cards" id="cards"></div>
   </div>
 </section>
+<script>
+/* ==================================================================
+   👉👉 ADD YOUR PROJECT PDF LINKS HERE 👈👈
+   ------------------------------------------------------------------
+   Each entry below = one card in the "out of the folder" section.
+     title : card heading
+     tag   : small label under the title
+     text  : short description
+     pdf   : relative path to your PDF — opens in a new browser tab
+   1. In your GitHub repo, create a folder named  projects  next to
+      index.html and upload your PDF files into it.
+   2. Point each  pdf:  path at a file, e.g. "./projects/my-case-study.pdf"
+   3. Add, remove, rename or reorder entries freely — the cards,
+      colors and animation delays are generated automatically.
+   ================================================================== */
+const PROJECTS = [
+  {
+    title: 'AI-Search Visibility Program',
+    tag:   'geo · aeo · llm citations',
+    text:  'Built the playbook for getting product pages cited by ChatGPT, Perplexity & AI Overviews — lifting AI-referred signups.',
+    pdf:   './projects/ai-search-visibility.pdf',
+  },
+  {
+    title: 'Onboarding Experiment Suite',
+    tag:   'activation · a/b testing',
+    text:  'Ran a season of onboarding experiments — copy, sequencing, aha-moment nudges — compounding into a double-digit activation lift.',
+    pdf:   './projects/onboarding-experiments.pdf',
+  },
+  {
+    title: 'Content Growth Engine',
+    tag:   'seo · editorial ops',
+    text:  'Designed a keyword-to-publish pipeline that scaled organic content velocity without sacrificing quality or rankings.',
+    pdf:   './projects/content-growth-engine.pdf',
+  },
+  {
+    title: 'Pricing Page CRO',
+    tag:   'conversion · gtm',
+    text:  'Rebuilt the pricing experience around objections & anchoring — a cleaner path from "curious" to "customer".',
+    pdf:   './projects/pricing-page-cro.pdf',
+  },
+  // add more projects here…
+];
+/* --- card generator (no need to edit below this line) --- */
+(function () {
+  const GRADS = [
+    'linear-gradient(135deg,#CE9FFC,#7367F0)',
+    'linear-gradient(135deg,#F97794,#623AA2)',
+    'linear-gradient(135deg,#E2B0FF,#9F44D3)',
+    'linear-gradient(135deg,#F761A1,#8C1BAB)',
+  ];
+  const TILTS = ['-3deg', '2deg', '-2deg', '3deg'];
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  document.getElementById('cards').innerHTML = PROJECTS.map((p, i) => `
+    <a class="card" href="${esc(p.pdf)}" target="_blank" rel="noopener noreferrer"
+       style="--d:${i * 110}ms; --grad:${GRADS[i % 4]}; --tilt:${TILTS[i % 4]};">
+      <div class="thumb"><span class="go">↗</span></div>
+      <div class="card-body">
+        <h3>${esc(p.title)}</h3>
+        <span class="tag">${esc(p.tag)}</span>
+        <p>${esc(p.text)}</p>
+      </div>
+    </a>`).join('');
+})();
+</script>
 <!-- ============ CONTACT ============ -->
 <section id="contact" class="panel" style="--z:4;" aria-label="contact" tabindex="-1">
   <div class="inner">
@@ -757,34 +819,9 @@ const fadeCue = () => {
 };
 addEventListener('scroll', fadeCue, { passive: true });
 fadeCue();
-/* ---------- 4. slot machine (fixed 640x910 design, scaled as one unit) ---------- */
-const DESIGN_W = 640, DESIGN_H = 910;
-const fitbox = document.getElementById('fitbox');
-const design = document.getElementById('design');
-function fit() {
-  if (innerWidth > 920) {
-    /* desktop: unchanged JS sizing */
-    const s = Math.min(innerWidth * 0.40 / DESIGN_W, innerHeight * 0.86 / DESIGN_H, 1);
-    design.style.transform = `translate(-50%,-50%) scale(${s})`;
-    fitbox.style.width = DESIGN_W * s + 'px';
-    fitbox.style.height = DESIGN_H * s + 'px';
-  } else {
-    /* mobile: CSS owns the box (width + aspect-ratio, sized before paint).
-       JS only mirrors the scale as a fallback — a transform-only write,
-       no layout work. Clear any desktop inline size first. */
-    fitbox.style.width = '';
-    fitbox.style.height = '';
-    const s = Math.min(fitbox.clientWidth / DESIGN_W, 1);
-    design.style.transform = `translate(-50%,-50%) scale(${s})`;
-  }
-}
-fit();
-/* rAF-throttled: at most one refit per frame */
-let fitRaf = 0;
-addEventListener('resize', () => {
-  cancelAnimationFrame(fitRaf);
-  fitRaf = requestAnimationFrame(fit);
-});
+/* ---------- 4. slot machine ----------
+   (sizing/fit lives in the small inline script right after the hero
+   section, so the machine is sized before first paint) */
 /* reel constants */
 const REELS = 12;
 const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ-';   // space renders blank
@@ -932,6 +969,7 @@ Object.keys(SECTIONS).forEach(name => {
 });
 /* spin */
 const SPIN_MS = reduceMotion ? 50 : 2000, STAGGER_MS = reduceMotion ? 0 : 150;
+const WINDUP_MS = reduceMotion ? 0 : 100;  /* reels tug backwards before spinning (anticipation) */
 function spinTo(sectionName) {
   if (spinning) return;
   spinning = true;
@@ -949,17 +987,25 @@ function spinTo(sectionName) {
     const delta = (2 + Math.floor(i / 4)) * NCH + ((targetIdx - cur + NCH) % NCH || NCH);
     const newPos = r.pos + delta;
     const dur = SPIN_MS + i * STAGGER_MS;
-    r.strip.style.transition = `transform ${dur}ms cubic-bezier(.14,.6,.18,1)`;
-    r.strip.style.transform = `translateY(${yFor(newPos)}px)`;
+    /* anticipation: a quick backwards tug, then the spin releases —
+       long ease-out so the reels decelerate and settle naturally */
+    if (WINDUP_MS) {
+      r.strip.style.transition = `transform ${WINDUP_MS}ms cubic-bezier(.36,0,.66,1)`;
+      r.strip.style.transform = `translateY(${yFor(r.pos) + 14}px)`;
+    }
+    setTimeout(() => {
+      r.strip.style.transition = `transform ${dur}ms cubic-bezier(.14,.6,.18,1)`;
+      r.strip.style.transform = `translateY(${yFor(newPos)}px)`;
+    }, WINDUP_MS);
     r.pos = newPos;
     setTimeout(() => {
       const base = NCH * 3 + (r.pos % NCH);
       r.strip.style.transition = 'none';
       r.strip.style.transform = `translateY(${yFor(base)}px)`;
       r.pos = base;
-    }, dur + 30);
+    }, WINDUP_MS + dur + 30);
   });
-  const total = SPIN_MS + (REELS - 1) * STAGGER_MS + 120;
+  const total = WINDUP_MS + SPIN_MS + (REELS - 1) * STAGGER_MS + 120;
   setTimeout(() => {
     display.innerHTML = SECTIONS[sectionName] +
       `<div class="stamp">★ ${sectionName.toUpperCase()} ★</div>`;
@@ -973,7 +1019,9 @@ function spinTo(sectionName) {
 function pullLever() {
   if (spinning) return;
   lever.classList.add('pulled');
-  setTimeout(() => lever.classList.remove('pulled'), 420);
+  /* haptic feedback on supported mobile devices */
+  if (!reduceMotion && navigator.vibrate) navigator.vibrate([12, 40, 8]);
+  setTimeout(() => lever.classList.remove('pulled'), 460);
   leverIdx = (leverIdx + 1) % LEVER_ORDER.length;
   spinTo(LEVER_ORDER[leverIdx]);
 }
