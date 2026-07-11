@@ -13,7 +13,15 @@ Fonts load from Google Fonts and Three.js loads from unpkg CDN at runtime.
 ## Responsive behavior
 
 - **Desktop (>920px):** 4 sections — hero (copy + slot machine side by side), skills, projects, contact
-- **Mobile/tablet (≤920px):** 5 sections — the hero splits into an intro screen and a full-screen slot machine
+- **Mobile/tablet (≤920px):** 5 sections — the hero splits into an intro screen and a full-screen slot machine, with scroll-snap so one swipe moves one screen
+
+## Mobile performance
+
+On viewports ≤920px the site trades some visual polish for smooth scrolling:
+
+- `backdrop-filter` blur is disabled (section panels use a near-solid background instead)
+- Ballpit background is lightened: 40 balls (vs 120), lower-poly spheres, pixel ratio capped at 1.5x
+- Scroll-snap uses `proximity`, so sections taller than the viewport still scroll freely
 
 ## Run locally
 
