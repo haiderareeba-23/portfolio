@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adaptive Revision Cheatsheets, a Product Feature Proposal by Areeba Haider</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5EEF7;
+  --card:#FBF7FC;
+  --plum:#4A1D4E;
+  --plum-soft:#6C3B70;
+  --lilac:#9B7BA0;
+  --text:#3A2140;
+  --muted:#7A5F80;
+  --line:#C9AECF;
+  --radius:18px;
+  /* dark product mock */
+  --mk-bg:#14101B;--mk-panel:#1D1727;--mk-line:#372B47;--mk-accent:#B98CE0;--mk-text:#EFE8F5;--mk-muted:#9C8BAF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Poppins',system-ui,sans-serif;font-size:16.5px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--plum);color:#fff}
+h1,h2,h3{color:var(--plum);font-weight:700}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+.dash{border:none;border-top:2.5px dashed var(--line);margin:0}
+.star-label{
+  text-align:center;font-size:13px;font-weight:600;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--lilac);padding:16px 0;
+}
+.star-label::before{content:"★ ";}
+.star-label::after{content:" ★";}
+
+nav{display:flex;justify-content:space-between;align-items:center;padding:28px 0}
+.brand{font-weight:800;font-size:18px;color:var(--plum)}
+nav .tag{font-size:12.5px;font-weight:500;color:var(--plum-soft);border:1.5px solid var(--line);padding:6px 16px;border-radius:99px;background:var(--card)}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding:48px 0 80px}
+.eyebrow{
+  font-size:12.5px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--lilac);margin-bottom:20px;
+}
+.eyebrow::before{content:"★ "}
+.hero h1{
+  font-size:clamp(36px,4.8vw,54px);font-weight:800;line-height:1.12;
+  letter-spacing:-.01em;margin-bottom:22px;text-transform:uppercase;
+}
+.hero p.lede{font-size:17.5px;color:var(--muted);max-width:35em;margin-bottom:30px}
+.hero p.lede strong{color:var(--plum);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  font-size:13px;font-weight:500;color:var(--plum);background:var(--card);
+  border:1.5px dashed var(--line);padding:8px 16px;border-radius:99px;
+}
+.chip b{font-weight:700}
+
+/* ---------- cheatsheet mockup ---------- */
+.mock-col{display:flex;justify-content:center}
+.mock{
+  width:360px;background:var(--mk-bg);border-radius:22px;padding:0;overflow:hidden;
+  box-shadow:0 0 0 1.5px var(--mk-line),0 34px 70px -28px rgba(74,29,78,.5);
+  color:var(--mk-text);font-size:13px;
+}
+.mock .mbar{display:flex;gap:6px;padding:13px 16px;border-bottom:1px solid var(--mk-line)}
+.mock .mbar span{width:10px;height:10px;border-radius:50%;background:var(--mk-line)}
+.mock .mhead{padding:18px 20px 6px}
+.mock .mkicker{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mk-accent);font-weight:600}
+.mock .mhead h3{color:var(--mk-text);font-size:19px;margin:4px 0 8px}
+.mock .lvl{display:inline-flex;align-items:center;gap:6px;font-size:11px;background:var(--mk-panel);
+  border:1px solid var(--mk-line);padding:4px 11px;border-radius:99px;color:var(--mk-muted)}
+.mock .lvl b{color:var(--mk-accent)}
+.mock .msec{margin:12px 16px;background:var(--mk-panel);border:1px solid var(--mk-line);border-radius:12px;padding:11px 14px}
+.mock .msec .mt{font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:8px}
+.mock .msec .mt .n{width:17px;height:17px;border-radius:50%;background:var(--mk-line);display:grid;place-items:center;font-size:9.5px;color:var(--mk-accent);font-weight:700}
+.mock .msec p{color:var(--mk-muted);font-size:11.5px;line-height:1.55;margin-top:4px}
+.mock .msec.tips{border-color:var(--mk-accent);background:rgba(185,140,224,.08)}
+.mock .msec.tips .mt{color:var(--mk-accent)}
+.mock .mfoot{padding:6px 16px 16px;color:var(--mk-muted);font-size:10.5px;text-align:center}
+
+/* ---------- sections ---------- */
+section{padding:60px 0}
+.sec-inner{
+  background:var(--card);border-radius:var(--radius);padding:52px 56px;
+  box-shadow:0 10px 40px -22px rgba(74,29,78,.25);
+}
+.sec-title{
+  text-align:center;font-size:clamp(24px,3vw,32px);font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;
+}
+.sec-inner .dash{margin-bottom:32px}
+.sec-body p.intro{color:var(--muted);max-width:44em;margin:0 auto 28px;text-align:center}
+.sec-body p.intro strong{color:var(--plum)}
+.sec-body p.body{max-width:720px;margin:0 auto 18px;color:var(--text)}
+.sec-body p.body strong{color:var(--plum)}
+
+ul.plain{list-style:none;max-width:720px;margin:0 auto}
+ul.plain li{position:relative;padding:0 0 15px 30px;font-size:15.5px}
+ul.plain li::before{content:"•";position:absolute;left:8px;color:var(--plum);font-weight:700}
+ul.plain li b{color:var(--plum);font-weight:600}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:880px;margin:0 auto}
+.card{background:var(--bg);border:1.5px dashed var(--line);border-radius:var(--radius);padding:24px 26px}
+.card h3{font-size:16.5px;margin-bottom:8px}
+.card p{font-size:14.5px;color:var(--muted)}
+.card .kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--lilac);font-weight:600;margin-bottom:8px}
+
+/* numbered structure list */
+.numlist{max-width:720px;margin:0 auto;counter-reset:step}
+.numstep{display:flex;gap:18px;padding-bottom:20px}
+.numstep .nn{
+  counter-increment:step;flex-shrink:0;width:34px;height:34px;border-radius:50%;
+  background:var(--plum);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;
+}
+.numstep .nn::before{content:counter(step)}
+.numstep h3{font-size:16px;margin-bottom:3px}
+.numstep p{font-size:14.5px;color:var(--muted)}
+.numstep.hl .nn{background:var(--lilac)}
+.numstep.hl h3{color:var(--plum-soft)}
+
+/* metrics table */
+table{width:100%;max-width:860px;margin:0 auto;border-collapse:collapse;font-size:14.5px}
+th{background:var(--plum);color:#fff;text-align:left;padding:12px 16px;font-weight:600;font-size:13.5px}
+th:first-child{border-radius:12px 0 0 0}th:last-child{border-radius:0 12px 0 0}
+td{padding:12px 16px;border-bottom:1.5px dashed var(--line);color:var(--text);vertical-align:top}
+td:first-child{font-weight:600;color:var(--plum);white-space:nowrap}
+td:last-child,th:last-child{color:inherit}
+tr:nth-child(even) td{background:rgba(201,174,207,.12)}
+
+footer{padding:40px 0 56px;text-align:center}
+footer p{color:var(--muted);font-size:13.5px}
+footer b{color:var(--plum)}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{transition:none!important;opacity:1!important;transform:none!important}}
+
+@media(max-width:920px){
+  .hero{grid-template-columns:1fr;padding:20px 0 56px}
+  .mock-col{order:-1}
+  .sec-inner{padding:36px 22px}
+  .grid2{grid-template-columns:1fr}
+  table{font-size:13px}
+  td,th{padding:10px 10px}
+  td:first-child{white-space:normal}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="brand">Areeba Haider</div>
+    <div class="tag">Product Management Portfolio</div>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Hackathon Project · Product Feature Proposal</div>
+      <h1>Adaptive Revision Cheatsheets</h1>
+      <p class="lede">Proposed and built as a hackathon project. <strong>Adaptive Revision Cheatsheets</strong> are AI generated, pattern specific revision guides personalized to each user's performance data. The feature turns months of scattered practice feedback into a single, targeted revision view, with content depth adapted to the user's proficiency level.</p>
+      <div class="chips">
+        <div class="chip"><b>Hackathon</b> project</div>
+        <div class="chip">AI powered <b>personalization</b></div>
+        <div class="chip">Last minute <b>revision</b></div>
+        <div class="chip"><b>26</b> coding patterns</div>
+        <div class="chip"><b>Two</b> proficiency levels</div>
+      </div>
+    </div>
+
+    <div class="mock-col">
+      <div class="mock" aria-label="Concept mockup of a personalized revision cheatsheet">
+        <div class="mbar"><span></span><span></span><span></span></div>
+        <div class="mhead">
+          <div class="mkicker">Revision Cheatsheet</div>
+          <h3>Two Pointers</h3>
+          <div class="lvl">Tailored for <b>Advanced</b> · concise view</div>
+        </div>
+        <div class="msec"><div class="mt"><span class="n">1</span>What is the technique?</div><p>Traverse with two indices moving toward or away from each other to cut a nested scan to linear time.</p></div>
+        <div class="msec"><div class="mt"><span class="n">2</span>When to use it</div><p>Sorted arrays, pair sums, deduplication, and partition style problems.</p></div>
+        <div class="msec"><div class="mt"><span class="n">3</span>Complexity analysis</div><p>Time O(n) · Space O(1)</p></div>
+        <div class="msec"><div class="mt"><span class="n">4</span>Common mistakes</div><p>Off by one boundaries, moving the wrong pointer, missing the loop exit condition.</p></div>
+        <div class="msec tips"><div class="mt"><span class="n">5</span>Coach's tips for you</div><p>In 3 of your last 5 submissions you advanced both pointers on a match. Slow down at the update step and re check which pointer should move.</p></div>
+        <div class="mfoot">Generated from your practice history · reviewed structure</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= PROBLEM ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">The Problem</div>
+      <hr class="dash">
+      <ul class="plain">
+        <li>Interview prep platforms excel at guiding users through comprehensive, long term learning, but they lack a fast and focused way to consolidate critical concepts at the last minute.</li>
+        <li>Despite months of preparation, hours before the big interview even the best candidates second guess themselves. They want a quick refresher on key coding patterns and insights, but sifting through pages of notes, dozens of solved problems, and scattered feedback feels overwhelming exactly when time is scarcest.</li>
+        <li><b>The gap:</b> quick, personalized revision, right before stepping into the interview room.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= CONTEXT ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">Context: The Adaptive Prep Platform</div>
+      <hr class="dash">
+      <p class="intro">The proposal builds on an adaptive coding interview prep platform: <strong>26 essential coding patterns in a structured 4 week roadmap</strong>, where every part of the experience responds to user performance.</p>
+      <div class="grid2">
+        <div class="card">
+          <div class="kicker">Adaptive Problems</div>
+          <h3>The platform adapts to performance</h3>
+          <p>The next problem is selected to match each user's skill level and learning needs.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">AI Feedback</div>
+          <h3>Every submission is reviewed</h3>
+          <p>Each code submission receives AI generated feedback on approach, correctness, and optimization.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Performance Insights</div>
+          <h3>Patterns surface strengths and gaps</h3>
+          <p>Completing a pattern produces insights highlighting strengths and areas for improvement.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Proficiency Scoring</div>
+          <h3>Users are classified by level</h3>
+          <p>A scoring system classifies users as beginner, intermediate, advanced, or expert.</p>
+        </div>
+      </div>
+      <p class="body" style="text-align:center;margin-top:26px;max-width:44em">This produces rich per user performance data, the raw material for personalized revision. What is missing is a product surface that consolidates it at the moment of highest need.</p>
+    </div>
+  </section>
+
+  <!-- ================= SOLUTION ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">The Solution</div>
+      <hr class="dash">
+      <p class="intro">Use AI to analyze user learning data and deliver <strong>personalized, pattern specific cheatsheets</strong>: a last minute revision experience designed to save time and boost confidence.</p>
+
+      <div class="grid2" style="margin-bottom:34px">
+        <div class="card">
+          <div class="kicker">Core Design Decision</div>
+          <h3>Quick, pattern based focus</h3>
+          <p>Each cheatsheet covers exactly one coding pattern, so users revise efficiently without distraction.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Core Design Decision</div>
+          <h3>Two levels of detail, driven by proficiency data</h3>
+          <p>A concise, technical version for advanced users and a thorough, simplified version for beginners. The user's proficiency score selects the default.</p>
+        </div>
+      </div>
+
+      <p class="intro"><strong>Cheatsheet structure: five critical areas</strong></p>
+      <div class="numlist">
+        <div class="numstep"><span class="nn"></span><div><h3>What is the technique?</h3><p>A brief summary of the concept and its mechanics.</p></div></div>
+        <div class="numstep"><span class="nn"></span><div><h3>When to use it</h3><p>Clear criteria for identifying problems that match the pattern.</p></div></div>
+        <div class="numstep"><span class="nn"></span><div><h3>Complexity analysis</h3><p>Time and space complexity of applying the technique.</p></div></div>
+        <div class="numstep"><span class="nn"></span><div><h3>Common mistakes</h3><p>Key pitfalls to avoid during implementation.</p></div></div>
+        <div class="numstep hl"><span class="nn"></span><div><h3>Coach's tips: key areas to watch</h3><p>Actionable, data driven insights tailored to the user's learning history and their own recurring mistakes.</p></div></div>
+      </div>
+      <p class="body" style="text-align:center;max-width:44em">The first four areas establish a reliable revision baseline. The fifth is where personalization creates defensible value: it transforms scattered feedback into a targeted, adaptive revision tool no generic cheatsheet can replicate.</p>
+    </div>
+  </section>
+
+  <!-- ================= GOALS ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">Business and User Goals</div>
+      <hr class="dash">
+      <div class="grid2">
+        <div class="card">
+          <div class="kicker">Business Goal</div>
+          <h3>Increase engagement and retention</h3>
+          <p>Give users a reason to return to the platform for quick, personalized revision after long term preparation ends.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Business Goal</div>
+          <h3>Differentiate the platform</h3>
+          <p>Offer a niche, value added feature unavailable on competing platforms, attracting new users and strengthening the platform's position in interview preparation.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Business Goal</div>
+          <h3>Drive subscription growth</h3>
+          <p>Gate the feature to paid users, motivating free users to upgrade and new users to subscribe.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Business Goal</div>
+          <h3>Support the AI first mission</h3>
+          <p>Use AI to deliver tailored learning experiences, positioning the platform as the go to resource for interview prep.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">User Goal</div>
+          <h3>Streamline revision</h3>
+          <p>Consolidate months of learning and practice into a single, focused view with no navigating scattered feedback and materials.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">User Goal</div>
+          <h3>Gain personalized insights</h3>
+          <p>Access tailored, actionable tips and performance based insights to address weaknesses and reinforce strengths before interviews.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TECHNICAL APPROACH ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">Technical Approach</div>
+      <hr class="dash">
+      <div class="grid2">
+        <div class="card">
+          <div class="kicker">Content Pipeline</div>
+          <h3>AI generated baseline insights per pattern</h3>
+          <p>A one time migration in which AI generates initial cheatsheet content for each of the 26 patterns, reviewed by a content team for accuracy and clarity. The reviewed cheatsheets then serve as few shot examples alongside carefully crafted prompts, and structured outputs enforce a consistent format across all cheatsheets.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Personalization</div>
+          <h3>Built on existing adaptive systems</h3>
+          <p>The adaptive platform already produces performance based feedback on submissions and patterns. The feature taps this data plus the proficiency rating system to tailor content and surface each user's recurring mistakes. To keep processing tractable, feedback is aggregated across submissions, key mistakes are stored and analyzed, and the most recent data is weighted highest, keeping insights relevant without heavy per request computation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= METRICS ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">Success Metrics</div>
+      <hr class="dash">
+      <p class="intro">The measurement plan is defined up front, before any development begins.</p>
+      <table>
+        <tr><th>Goal</th><th>Metric</th><th>Signal of success</th></tr>
+        <tr><td>Adoption</td><td>Percentage of pattern completers who open a cheatsheet</td><td>Sustained usage post launch</td></tr>
+        <tr><td>Engagement</td><td>Cheatsheet views in the 48 hours before user reported interview dates, plus repeat visits</td><td>Usage concentrated at the moment of need</td></tr>
+        <tr><td>Retention</td><td>Return rate of users after completing the 4 week roadmap</td><td>Lift versus the non cheatsheet cohort</td></tr>
+        <tr><td>Monetization</td><td>Free to paid conversions attributed to the cheatsheet paywall</td><td>Measurable contribution to upgrades</td></tr>
+        <tr><td>Quality</td><td>User rating of cheatsheet usefulness and content team review pass rate for AI output</td><td>High perceived value, low correction rate</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= FUTURE ================= -->
+  <section>
+    <div class="sec-inner reveal">
+      <div class="sec-title">Future Expansion</div>
+      <hr class="dash">
+      <p class="body">Today's course cheatsheets are general, lengthy, and one size fits all. The next step is to leverage user data from quizzes and AI widgets within each course to generate highly personalized, concise cheatsheets tailored to each learner's journey.</p>
+      <p class="body">Over time, cheatsheets can extend across other modules of the full loop interview prep experience and the wider course catalog, using each user's progress, understanding, and specific challenges to surface exactly what they need to focus on right before their interview.</p>
+    </div>
+  </section>
+
+  <div class="star-label">Adaptive Revision Cheatsheets · Product Feature Proposal</div>
+
+  <footer>
+    <p><b>Areeba Haider</b> · Product Management Portfolio · Adaptive Revision Cheatsheets · 2026</p>
+  </footer>
+</div>
+
+<script>
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
