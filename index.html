@@ -367,9 +367,13 @@ section:focus{outline:none;}
 @keyframes cue{0%{transform:translateY(0);opacity:1}70%{transform:translateY(10px);opacity:0}100%{opacity:0}}
 /* ---- mobile / tablet: hero splits into TWO full-screen sections ---- */
 @media (max-width:920px){
-  /* one swipe = one screen: snap points on every screen */
-  html{scroll-snap-type:y proximity;}
-  .panel,.hero-copy,.machine-col{scroll-snap-align:start;scroll-snap-stop:always;}
+  /* MOBILE FIX: scroll-snap removed. `scroll-snap-type` on html combined
+     with snap points on a position:sticky element (.hero-copy) fights the
+     sticky-stack — the browser keeps re-targeting snap positions mid-scroll,
+     which reads as stutter/jumping. Native momentum scroll is smooth. */
+  /* MOBILE FIX: clip any stray horizontal overflow (full-bleed machine-col,
+     drop shadows) without creating a new scroll container. */
+  html,body{overflow-x:clip;}
   #hero .inner{
     flex-direction:column;justify-content:flex-start;text-align:center;gap:0;
     min-height:auto;padding-top:0;padding-bottom:0;
@@ -445,8 +449,12 @@ section:focus{outline:none;}
 @media (max-width:760px){
   .arc{min-height:0;}
   .arc-flex{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;padding-top:1rem;}
+  /* MOBILE FIX: the infinite border-radius morph forces continuous repaints
+     of 11 elements — a big chunk of the scroll jank on phones. Blobs are
+     static shapes on mobile; the entrance reveal still plays. */
   .blob{position:static;width:auto;height:auto;padding:.9rem 1.2rem;font-size:.78rem;
-    border-radius:40% 60% 55% 45% / 50% 45% 55% 50%;}
+    border-radius:40% 60% 55% 45% / 50% 45% 55% 50%;
+    animation:none;}
 }
 /* ================= PROJECTS ================= */
 #projects .inner{justify-content:flex-start;}
@@ -634,7 +642,16 @@ section:focus{outline:none;}
   }
   fit();
   let raf = 0;
-  addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); });
+  /* MOBILE FIX: on phones the collapsing URL bar fires height-only resize
+     events on every scroll direction change; re-running fit() mid-scroll
+     causes a visible re-layout hitch. Skip those — only refit when the
+     width actually changes (rotation / real resize). Desktop unchanged. */
+  let lastFitW = innerWidth;
+  addEventListener('resize', () => {
+    if (innerWidth <= 920 && innerWidth === lastFitW) return;
+    lastFitW = innerWidth;
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(fit);
+  });
 })();
 </script>
 <!-- ============ SKILLS ============ -->
@@ -790,14 +807,25 @@ const reveal = (id, threshold) => {
 };
 reveal('skills', 0.15);
 reveal('projects', 0.20);
-/* ---------- 3. hero: scroll cue fade (0 → 40svh) ---------- */
+/* ---------- 3. hero: scroll cue fade (0 → 40svh) ----------
+   MOBILE FIX: throttled to one style write per frame via rAF, and skips
+   the write entirely once the cue is hidden — the old version wrote
+   styles on every scroll event, forcing extra work mid-scroll. */
 const cue = document.getElementById('scrollCue');
+let lastCueF = -1;
 const fadeCue = () => {
   const f = Math.max(0, 1 - scrollY / (innerHeight * 0.4));
+  if (f === 0 && lastCueF === 0) return;
+  lastCueF = f;
   cue.style.opacity = f;
   cue.style.visibility = f === 0 ? 'hidden' : 'visible';
 };
-addEventListener('scroll', fadeCue, { passive: true });
+let cueTick = false;
+addEventListener('scroll', () => {
+  if (cueTick) return;
+  cueTick = true;
+  requestAnimationFrame(() => { fadeCue(); cueTick = false; });
+}, { passive: true });
 fadeCue();
 /* ---------- 4. slot machine ----------
    (sizing/fit lives in the small inline script right after the hero
@@ -917,7 +945,7 @@ const SECTIONS = {
     <h2>Contact Me</h2>
     <p><strong>Phone:</strong> <a href="tel:+923284099249">0328 4099249</a></p>
     <p><strong>Email:</strong> <a href="mailto:haiderareeba26@gmail.com">haiderareeba26@gmail.com</a></p>
-    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/areeba-haider-231303abc" target="_blank" rel="noopener">[www.linkedin.com/in/areeba-haider-231303abc](https://www.linkedin.com/in/areeba-haider-231303abc)</a></p>`
+    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/areeba-haider-231303abc" target="_blank" rel="noopener">www.linkedin.com/in/areeba-haider-231303abc</a></p>`
 };
 /* deterministic lever order (not random) */
 const LEVER_ORDER = ['Experience', 'Skills', 'Tools', 'Certificates', 'Education', 'Contact Me'];
@@ -1066,7 +1094,17 @@ async function initBallpit() {
     halfW = halfH * camera.aspect;
   }
   resize();
-  addEventListener('resize', resize);
+  /* MOBILE FIX: the collapsing URL bar fires height-only resize events on
+     every scroll direction change; resizing the WebGL renderer mid-scroll
+     stalls the frame AND makes the whole ballpit visibly jump. Only resize
+     when the width changes (rotation / real resize). Desktop unchanged. */
+  let lastBallW = innerWidth;
+  const guardedResize = fn => () => {
+    if (innerWidth <= 920 && innerWidth === lastBallW) return;
+    lastBallW = innerWidth;
+    fn();
+  };
+  addEventListener('resize', guardedResize(resize));
   const geo = new THREE.SphereGeometry(1, isMobile ? 16 : 24, isMobile ? 16 : 24);
   const mat = new THREE.MeshPhysicalMaterial({
     roughness: 0.42, metalness: 0.08,
@@ -1114,7 +1152,7 @@ async function initBallpit() {
   if (reduceMotion) { /* static scatter, no physics loop */
     balls.forEach(b => { b.y = -halfH + b.r + Math.random() * halfH * 0.8; });
     commit();
-    addEventListener('resize', () => { resize(); commit(); });
+    addEventListener('resize', guardedResize(() => { resize(); commit(); }));
     return;
   }
   let last = performance.now(), t = 0;
