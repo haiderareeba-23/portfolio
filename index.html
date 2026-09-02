@@ -75,6 +75,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 }
 #hero{position:sticky;top:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;}
 #skills.panel{background:rgba(33,6,53,.88);}
+#metrics.panel{background:rgba(33,6,53,.92);}
 @media (max-width:920px),(prefers-reduced-motion:reduce){
   .panel{background:rgba(33,6,53,.94);backdrop-filter:none;-webkit-backdrop-filter:none;}
   #hero{background:transparent;}
@@ -411,6 +412,39 @@ section:focus{outline:none;}
   .machine-eyebrow{display:block;margin:0;}
   .scroll-cue{top:calc(100svh - 4.5rem);bottom:auto;}
 }
+/* ================= METRICS ================= */
+#metrics .inner{justify-content:flex-start;}
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1.2rem;
+  margin-top:2rem;
+}
+.metric-card{
+  background:rgba(66,13,75,.28);
+  border:1px solid rgba(245,213,224,.1);
+  border-radius:20px;
+  padding:1.9rem 1.5rem;
+  display:flex;flex-direction:column;gap:.7rem;
+  transition:transform 350ms var(--spring),border-color 300ms,box-shadow 300ms;
+}
+.metric-card:hover{transform:translateY(-4px);border-color:rgba(245,213,224,.28);box-shadow:0 22px 50px rgba(13,2,22,.45);}
+.metric-value{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:clamp(1.7rem,3.2vw,2.5rem);
+  letter-spacing:-.01em;
+  background:linear-gradient(90deg,var(--blush),#a5a6e0 55%,#c86bc9);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  white-space:normal;
+}
+.metric-value .mv-sym{transition:opacity .35s var(--ease-out);}
+.metric-label{
+  margin:0;font-size:.85rem;color:var(--muted);line-height:1.5;
+}
+@media (max-width:640px){
+  .metrics-grid{grid-template-columns:1fr;}
+}
 /* ================= SKILLS ================= */
 #skills .inner{justify-content:flex-start;}
 .arc{position:relative;flex:1;min-height:440px;margin-top:1.5rem;}
@@ -554,6 +588,7 @@ section:focus{outline:none;}
 <canvas id="ballpit" aria-hidden="true"></canvas>
 <nav id="site-nav" aria-label="section navigation">
   <a href="#hero" aria-label="intro"></a>
+  <a href="#metrics" aria-label="growth metrics"></a>
   <a href="#skills" aria-label="skills"></a>
   <a href="#projects" aria-label="projects"></a>
   <a href="#contact" aria-label="contact"></a>
@@ -655,8 +690,33 @@ section:focus{outline:none;}
   });
 })();
 </script>
+<!-- ============ GROWTH METRICS ============ -->
+<section id="metrics" class="panel" style="--z:2;" aria-label="growth metrics" tabindex="-1">
+  <div class="inner">
+    <p class="eyebrow">· growth metrics</p>
+    <h2 class="section-title">numbers that <span class="tint">moved</span></h2>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value" data-value="+67.1%">+67.1%</div>
+        <p class="metric-label">organic traffic uplift<br>/learn-to-code (1 month)</p>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" data-value="142.8K">142.8K</div>
+        <p class="metric-label">search volume added<br>41 keywords, top 20</p>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" data-value="105.6K+">105.6K+</div>
+        <p class="metric-label">organic clicks &amp; impressions<br>/courses &amp; /blog</p>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" data-value="+7% / +2.5%">+7% / +2.5%</div>
+        <p class="metric-label">click-ups &amp; signup rate<br>paywall experiment</p>
+      </div>
+    </div>
+  </div>
+</section>
 <!-- ============ SKILLS ============ -->
-<section id="skills" class="panel" style="--z:2;" aria-label="skills" tabindex="-1">
+<section id="skills" class="panel" style="--z:3;" aria-label="skills" tabindex="-1">
   <div class="inner">
     <p class="eyebrow">· 01 — toolkit</p>
     <h2 class="section-title">things i'm <span class="tint">good at</span></h2>
@@ -677,7 +737,7 @@ section:focus{outline:none;}
   </div>
 </section>
 <!-- ============ PROJECTS ============ -->
-<section id="projects" class="panel" style="--z:3;" aria-label="selected work" tabindex="-1">
+<section id="projects" class="panel" style="--z:4;" aria-label="selected work" tabindex="-1">
   <div class="inner">
     <p class="eyebrow">· 02 — selected work</p>
     <h2 class="section-title">out of the <span class="tint">folder</span></h2>
@@ -732,7 +792,7 @@ const PROJECTS = [
 })();
 </script>
 <!-- ============ CONTACT ============ -->
-<section id="contact" class="panel" style="--z:4;" aria-label="contact" tabindex="-1">
+<section id="contact" class="panel" style="--z:5;" aria-label="contact" tabindex="-1">
   <div class="inner">
     <p class="eyebrow">· 03 — say hi</p>
     <h2 class="section-title">let's make something <span class="tint">grow</span></h2>
@@ -808,6 +868,78 @@ const reveal = (id, threshold) => {
 };
 reveal('skills', 0.15);
 reveal('projects', 0.20);
+/* ---------- 2b. metrics: digit-roll on first reveal ----------
+   Final values already live in the DOM as real text (see the markup),
+   so no-JS / reduced-motion / SEO all see the correct numbers immediately.
+   This layers a "slot machine" digit roll on top, on first entry only. */
+(function () {
+  const metricsSection = document.getElementById('metrics');
+  if (!metricsSection) return;
+  const cards = [...metricsSection.querySelectorAll('.metric-card')];
+
+  function showFinal(card) {
+    const valueEl = card.querySelector('.metric-value');
+    valueEl.textContent = valueEl.dataset.value;
+  }
+
+  function rollCard(card, delay) {
+    const valueEl = card.querySelector('.metric-value');
+    const final = valueEl.dataset.value;
+    const chars = final.split('');
+    valueEl.innerHTML = chars.map(ch => {
+      const isDigit = /[0-9]/.test(ch);
+      return isDigit
+        ? `<span class="mv-digit" data-final="${ch}">0</span>`
+        : `<span class="mv-sym" data-final="${ch}">${ch}</span>`;
+    }).join('');
+    const digitSpans = [...valueEl.querySelectorAll('.mv-digit')];
+    const symSpans = [...valueEl.querySelectorAll('.mv-sym')];
+    symSpans.forEach(s => s.style.opacity = 0);
+
+    if (digitSpans.length === 0) {
+      setTimeout(() => { showFinal(card); }, delay);
+      return;
+    }
+
+    setTimeout(() => {
+      const CYCLE_MS = 500;
+      const LOCK_STEP = Math.max(50, Math.round(260 / digitSpans.length));
+      const cycleId = setInterval(() => {
+        digitSpans.forEach(s => {
+          if (!s.classList.contains('locked')) s.textContent = Math.floor(Math.random() * 10);
+        });
+      }, 45);
+      setTimeout(() => {
+        digitSpans.forEach((s, idx) => {
+          setTimeout(() => {
+            s.textContent = s.dataset.final;
+            s.classList.add('locked');
+            if (idx === digitSpans.length - 1) {
+              clearInterval(cycleId);
+              symSpans.forEach(sym => sym.style.opacity = 1);
+            }
+          }, idx * LOCK_STEP);
+        });
+      }, CYCLE_MS);
+    }, delay);
+  }
+
+  let metricsAnimated = false;
+  const metricsObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !metricsAnimated) {
+        metricsAnimated = true;
+        if (reduceMotion) {
+          cards.forEach(showFinal);
+        } else {
+          cards.forEach((card, i) => rollCard(card, i * 100));
+        }
+        metricsObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.45 });
+  metricsObserver.observe(metricsSection);
+})();
 /* ---------- 3. hero: scroll cue fade (0 → 40svh) ----------
    MOBILE FIX: throttled to one style write per frame via rAF, and skips
    the write entirely once the cue is hidden — the old version wrote
